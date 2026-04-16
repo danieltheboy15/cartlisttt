@@ -181,7 +181,7 @@ export default function CustomerDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FDF8F3]">
+      <div className="min-h-screen flex items-center justify-center dashboard-bg">
         <div className="w-10 h-10 border-4 border-cartlist-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -190,7 +190,7 @@ export default function CustomerDetails() {
   if (!data) return null;
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3] font-sans">
+    <div className="min-h-screen dashboard-bg font-sans">
       {/* Top Navigation */}
       <header className="bg-white border-b border-orange-50 px-4 md:px-8 h-20 flex items-center sticky top-0 z-50">
         <div className="flex-1 flex items-center lg:hidden">
