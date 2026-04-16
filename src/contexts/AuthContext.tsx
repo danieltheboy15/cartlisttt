@@ -4,8 +4,13 @@ interface User {
   id: string;
   businessName?: string;
   ownerName?: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   profilePicture?: string;
+  whatsappNumber?: string;
+  businessCategory?: string;
+  hasSeenWelcome?: boolean;
 }
 
 interface AuthContextType {
