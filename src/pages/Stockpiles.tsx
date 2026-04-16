@@ -428,7 +428,7 @@ export default function Stockpiles() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF8F3] font-sans">
+    <div className="min-h-screen dashboard-bg font-sans">
       <Header />
 
       <main className="max-w-[1600px] mx-auto p-4 md:p-8">
