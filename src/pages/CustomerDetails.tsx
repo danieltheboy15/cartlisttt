@@ -47,6 +47,7 @@ import {
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
+import { RemoveCustomerModal } from "@/components/RemoveCustomerModal";
 import { Logo } from "./Landing";
 
 interface CustomerDetailsData {
@@ -90,7 +91,6 @@ export default function CustomerDetails() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNoteSuccess, setShowNoteSuccess] = useState(false);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
-  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   useEffect(() => {
     fetchCustomerDetails();
@@ -133,6 +133,15 @@ export default function CustomerDetails() {
     }
   };
 
+  const handleRemoveClick = () => {
+    const skipConfirmation = localStorage.getItem("skip_delete_confirmation") === "true";
+    if (skipConfirmation) {
+      handleRemoveClient();
+    } else {
+      setIsRemoveModalOpen(true);
+    }
+  };
+
   const handleRemoveClient = async () => {
     try {
       const response = await fetchWithAuth(`/api/customers/${phone}`, {
@@ -144,6 +153,14 @@ export default function CustomerDetails() {
     } catch (error) {
       console.error("Error removing client:", error);
     }
+  };
+
+  const handleConfirmRemove = (dontShowAgain: boolean) => {
+    if (dontShowAgain) {
+      localStorage.setItem("skip_delete_confirmation", "true");
+    }
+    handleRemoveClient();
+    setIsRemoveModalOpen(false);
   };
 
   const handleToggleDelivery = async (stockpileId: string) => {
@@ -457,7 +474,7 @@ export default function CustomerDetails() {
             <Button 
               variant="ghost"
               className="text-red-500 hover:bg-red-50 hover:text-red-600 font-bold px-4"
-              onClick={() => setIsRemoveModalOpen(true)}
+              onClick={handleRemoveClick}
             >
               Remove client
             </Button>
@@ -609,68 +626,11 @@ export default function CustomerDetails() {
         }}
       />
 
-      {/* Remove Customer Modal */}
-      <AnimatePresence>
-        {isRemoveModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsRemoveModalOpen(false)}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden relative z-10"
-            >
-              <div className="p-8">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center shrink-0">
-                    <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-bold">!</div>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-gray-900">Remove Customer</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      This action will permanently remove the customer's profile and associated data. Are you sure you want to proceed?
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 mb-8">
-                  <div 
-                    onClick={() => setDontShowAgain(!dontShowAgain)}
-                    className={`w-5 h-5 rounded border transition-colors flex items-center justify-center cursor-pointer ${
-                      dontShowAgain ? "bg-cartlist-orange border-cartlist-orange" : "border-gray-200"
-                    }`}
-                  >
-                    {dontShowAgain && <CheckCircle2 className="w-3 h-3 text-white" />}
-                  </div>
-                  <span className="text-sm text-gray-600 font-medium">Don't show it again</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Button 
-                    variant="outline"
-                    onClick={handleRemoveClient}
-                    className="flex-1 h-12 rounded-xl border-gray-200 font-bold hover:bg-gray-50"
-                  >
-                    Remove
-                  </Button>
-                  <Button 
-                    onClick={() => setIsRemoveModalOpen(false)}
-                    className="flex-1 h-12 rounded-xl bg-cartlist-orange hover:bg-orange-600 text-white font-bold"
-                  >
-                    Dismiss
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <RemoveCustomerModal 
+        isOpen={isRemoveModalOpen}
+        onClose={() => setIsRemoveModalOpen(false)}
+        onConfirm={handleConfirmRemove}
+      />
     </div>
   );
 }
