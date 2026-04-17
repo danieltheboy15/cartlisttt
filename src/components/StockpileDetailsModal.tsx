@@ -31,7 +31,7 @@ interface Stockpile {
 
 export const StockpileDetailsModal = ({ stockpile, isOpen, onClose, onUpdate }: { stockpile: Stockpile | null, isOpen: boolean, onClose: () => void, onUpdate?: () => void }) => {
   const navigate = useNavigate();
-  const { fetchWithAuth } = useAuth();
+  const { user, fetchWithAuth } = useAuth();
   const { showToast } = useToast();
   const [isExtending, setIsExtending] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -41,6 +41,18 @@ export const StockpileDetailsModal = ({ stockpile, isOpen, onClose, onUpdate }: 
   const [isSendingReminder, setIsSendingReminder] = useState(false);
 
   if (!stockpile) return null;
+
+  // Calculate late fee if enabled
+  let lateFee = 0;
+  if (user?.enableLateFees && user?.lateFeeAmount && user.lateFeeAmount > 0 && stockpile.status === "active") {
+    const deadline = new Date(stockpile.endDate);
+    const now = new Date();
+    if (now > deadline) {
+      const diffTime = Math.abs(now.getTime() - deadline.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      lateFee = diffDays * user.lateFeeAmount;
+    }
+  }
 
   const totalItems = stockpile.items.reduce((acc, item) => acc + item.quantity, 0);
   const startDate = new Date(stockpile.createdAt);
@@ -209,7 +221,13 @@ export const StockpileDetailsModal = ({ stockpile, isOpen, onClose, onUpdate }: 
 
                 <div className="space-y-4">
                   <p className="text-lg font-bold text-gray-900">
-                    <span className="text-2xl">{diffDays}</span> Days <span className="text-2xl">{diffHours}</span> hours in total ⌛
+                    {diffTime > 0 ? (
+                      <>
+                        <span className="text-2xl">{diffDays}</span> Days <span className="text-2xl">{diffHours}</span> hours in total ⌛
+                      </>
+                    ) : (
+                      <span className="text-red-500 font-black">Stockpile Deadline Missed! ⚠️</span>
+                    )}
                   </p>
                   <div className="flex gap-1 h-2">
                     {[1, 2, 3, 4].map((seg) => {
@@ -221,13 +239,30 @@ export const StockpileDetailsModal = ({ stockpile, isOpen, onClose, onUpdate }: 
                         <div 
                           key={seg} 
                           className={`flex-1 rounded-full transition-colors ${
-                            isActive ? "bg-cartlist-orange" : "bg-gray-200"
+                            isActive ? (diffTime > 0 ? "bg-cartlist-orange" : "bg-red-400") : "bg-gray-200"
                           }`} 
                         />
                       );
                     })}
                   </div>
                 </div>
+
+                {lateFee > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-4 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2 text-red-600">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm font-bold uppercase tracking-wider">Late fee accumulated</span>
+                    </div>
+                    <span className="font-black text-red-600">
+                      {user?.currency === "Naira" ? "₦" : user?.currency === "Dollar" ? "$" : "€"}
+                      {lateFee.toLocaleString()}
+                    </span>
+                  </motion.div>
+                )}
               </div>
 
               {isExtending ? (
