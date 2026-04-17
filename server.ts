@@ -471,7 +471,7 @@ const userSchema = new mongoose.Schema({
   resetPasswordOTP: { type: String },
   resetPasswordExpires: { type: Date },
   resetPasswordAttempts: [{ type: Date }],
-  hasSeenWelcome: { type: Boolean, default: false },
+  hasSeenWelcome: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -676,6 +676,7 @@ app.get("/api/auth/google/callback", async (req, res) => {
         lastName: googleUser.family_name,
         googleId: googleUser.id,
         isEmailVerified: true, // Google emails are verified
+        hasSeenWelcome: false,
         profilePicture: googleUser.picture || "https://raw.githubusercontent.com/DannyYo696/svillage/29b4c24e6ca88b3ecf3856f30fceb3f29eef40bf/profile%20picture.webp",
       });
       await user.save();
@@ -1549,6 +1550,7 @@ app.post("/api/auth/register", async (req, res) => {
       password: hashedPassword,
       businessCategory,
       isEmailVerified: false,
+      hasSeenWelcome: false,
       verificationToken
     });
 
