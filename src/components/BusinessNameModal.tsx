@@ -10,15 +10,27 @@ export default function BusinessNameModal() {
   const { user, fetchWithAuth, checkAuth } = useAuth();
   const [businessName, setBusinessName] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [businessCategory, setBusinessCategory] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Only show if user is logged in but has no business name or whatsapp number
-  const show = !!user && (!user.businessName || !user.whatsappNumber);
+  // Only show if user is logged in but has no business name, whatsapp number or category
+  const show = !!user && (!user.businessName || !user.whatsappNumber || !user.businessCategory);
+
+  const categories = [
+    "Food & Groceries",
+    "Fashion & Apparel",
+    "Health & Beauty",
+    "Electronics",
+    "Home & Furniture",
+    "Agriculture",
+    "Baby & Kids",
+    "Other"
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessName.trim() || !whatsappNumber.trim()) return;
+    if (!businessName.trim() || !whatsappNumber.trim() || !businessCategory) return;
 
     setIsSubmitting(true);
     setError(null);
@@ -29,7 +41,8 @@ export default function BusinessNameModal() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           businessName: businessName.trim(),
-          whatsappNumber: whatsappNumber.trim()
+          whatsappNumber: whatsappNumber.trim(),
+          businessCategory
         }),
       });
 
@@ -109,9 +122,25 @@ export default function BusinessNameModal() {
                   />
                 </div>
 
+                <div className="space-y-2 sm:space-y-3">
+                  <Label htmlFor="businessCategory" className="text-sm font-bold ml-1">Business Category</Label>
+                  <select
+                    id="businessCategory"
+                    value={businessCategory}
+                    onChange={(e) => setBusinessCategory(e.target.value)}
+                    className="flex h-12 sm:h-14 w-full rounded-2xl border border-orange-100 bg-white px-6 py-2 text-base sm:text-lg ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-cartlist-orange focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none transition-all"
+                    required
+                  >
+                    <option value="" disabled>Select a category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !businessName.trim() || !whatsappNumber.trim()}
+                  disabled={isSubmitting || !businessName.trim() || !whatsappNumber.trim() || !businessCategory}
                   className="w-full h-14 sm:h-16 bg-cartlist-orange hover:bg-orange-600 text-white rounded-full text-lg sm:text-xl font-bold shadow-xl shadow-orange-200 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3"
                 >
                   {isSubmitting ? (
