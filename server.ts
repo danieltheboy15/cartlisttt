@@ -325,6 +325,55 @@ Questions? Contact ${vendor.businessName} on WhatsApp.`;
   }
 };
 
+const sendStockpileExtensionNotification = async (vendor: any, stockpile: any) => {
+  try {
+    const prefs = vendor.notifications?.stockpileUpdates || { email: true, sms: true, push: true, inApp: true };
+    const closingDate = format(new Date(stockpile.endDate), "d MMMM yyyy");
+    const appUrl = process.env.APP_URL || "";
+    const publicUrl = `${appUrl}/view/${stockpile._id}`;
+
+    // Send WhatsApp if enabled
+    if (prefs.sms !== false) {
+      const whatsappMessage = `Hi ${stockpile.customerName}! 📅
+${vendor.businessName} has updated the closing date for your stockpile.
+
+New closing date: ${closingDate}
+
+View your full list and status here 👉 ${publicUrl}
+
+Thank you for choosing ${vendor.businessName}!`;
+
+      await sendWhatsAppNotification(stockpile.customerPhone, whatsappMessage);
+    }
+
+    // Send Email if enabled
+    if (prefs.email !== false && stockpile.customerEmail) {
+      const resend = getResend();
+      if (resend) {
+        await resend.emails.send({
+          from: "Cartlist <onboarding@buynightflix.com>",
+          to: stockpile.customerEmail,
+          subject: `${vendor.businessName} has extended your stockpile deadline`,
+          html: `
+            <div style="font-family: sans-serif; padding: 20px; color: #333;">
+              <h2>Hi ${stockpile.customerName}!</h2>
+              <p><strong>${vendor.businessName}</strong> has updated the closing date for your stockpile.</p>
+              <p><strong>New Closing Date:</strong> ${closingDate}</p>
+              <p><a href="${publicUrl}" style="display: inline-block; padding: 10px 20px; background-color: #F07E48; color: white; text-decoration: none; border-radius: 5px;">View Detailed Status</a></p>
+              <p>Thank you for your business!</p>
+            </div>
+          `
+        });
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error sending extension notification:", error);
+    return false;
+  }
+};
+
 // Trust proxy is required for secure cookies behind a proxy (Cloud Run/AI Studio)
 app.set("trust proxy", 1);
 
@@ -1213,6 +1262,9 @@ app.patch("/api/stockpiles/:id", authenticate, async (req: any, res) => {
     if (deliveryDue !== undefined) updateData.deliveryDue = deliveryDue;
     if (status) updateData.status = status;
 
+    const originalStockpile = await Stockpile.findOne({ _id: req.params.id, vendorId, isDeleted: { $ne: true } });
+    if (!originalStockpile) return res.status(404).json({ message: "Stockpile not found" });
+
     let stockpile;
     if (appendItems && items) {
       stockpile = await Stockpile.findOneAndUpdate(
@@ -1236,11 +1288,16 @@ app.patch("/api/stockpiles/:id", authenticate, async (req: any, res) => {
 
     if (!stockpile) return res.status(404).json({ message: "Stockpile not found" });
 
-    // Send WhatsApp notification if items were appended
-    if (appendItems && items && items.length > 0) {
-      const vendor = await User.findById(vendorId);
-      if (vendor) {
+    const vendor = await User.findById(vendorId);
+    if (vendor) {
+      // Send WhatsApp notification if items were appended
+      if (appendItems && items && items.length > 0) {
         await sendStockpileUpdateNotification(vendor, stockpile, items);
+      }
+
+      // Send extension notification if endDate was changed
+      if (endDate && new Date(endDate).getTime() !== new Date(originalStockpile.endDate).getTime()) {
+        await sendStockpileExtensionNotification(vendor, stockpile);
       }
     }
 
