@@ -719,7 +719,9 @@ app.get("/api/auth/google/callback", async (req, res) => {
                   businessName: user.businessName,
                   ownerName: user.ownerName,
                   email: user.email,
-                  profilePicture: user.profilePicture
+                  profilePicture: user.profilePicture,
+                  hasSeenWelcome: user.hasSeenWelcome,
+                  googleId: user.googleId
                 })}
               }, '*');
               window.close();
@@ -1566,7 +1568,9 @@ app.post("/api/auth/register", async (req, res) => {
         businessName: user.businessName,
         ownerName: user.ownerName,
         email: user.email,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        hasSeenWelcome: user.hasSeenWelcome,
+        googleId: user.googleId
       }
     });
   } catch (error) {
@@ -1684,8 +1688,14 @@ app.post("/api/auth/login", async (req, res) => {
         id: user._id,
         businessName: user.businessName,
         ownerName: user.ownerName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        hasSeenWelcome: user.hasSeenWelcome,
+        googleId: user.googleId,
+        whatsappNumber: user.whatsappNumber,
+        businessCategory: user.businessCategory
       }
     });
   } catch (error) {
