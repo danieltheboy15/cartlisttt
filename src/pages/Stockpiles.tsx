@@ -57,6 +57,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import { Header } from "../components/Header";
 import { useEffect, useState } from "react";
 import { Logo } from "./Landing";
@@ -211,6 +212,7 @@ const StockpileStatsSidebar = ({ stats }: { stats: any }) => {
 export default function Stockpiles() {
   const navigate = useNavigate();
   const { user, logout, fetchWithAuth } = useAuth();
+  const { showToast } = useToast();
   const [stockpiles, setStockpiles] = useState<Stockpile[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -425,6 +427,7 @@ export default function Stockpiles() {
         method: "POST"
       });
       if (response.ok) {
+        showToast("Reminder sent");
         console.log(`Reminder sent to ${stockpile.customerName} successfully!`);
       } else {
         console.error("Failed to send reminder");
@@ -746,6 +749,7 @@ export default function Stockpiles() {
                                     e.stopPropagation();
                                     const url = `${window.location.origin}/view/${stockpile._id}`;
                                     navigator.clipboard.writeText(url);
+                                    showToast("Copied to clipboard");
                                     console.log("Link copied to clipboard!");
                                   }}
                                   className="rounded-xl px-3 py-2 cursor-pointer flex items-center gap-3 hover:bg-orange-50 group/item"
