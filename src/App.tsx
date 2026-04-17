@@ -17,6 +17,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import PublicCustomerView from "./pages/PublicCustomerView";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { ToastProvider } from "./contexts/ToastContext";
 import BusinessNameModal from "./components/BusinessNameModal";
 import WelcomeModal from "./components/WelcomeModal";
 
@@ -42,10 +43,11 @@ export default function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <BusinessNameModal />
-        <WelcomeModal />
-        <Router>
-          <Routes>
+        <ToastProvider>
+          <BusinessNameModal />
+          <WelcomeModal />
+          <Router>
+            <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
@@ -93,6 +95,7 @@ export default function App() {
           />
         </Routes>
       </Router>
+        </ToastProvider>
       </NotificationProvider>
     </AuthProvider>
   );
