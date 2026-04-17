@@ -19,7 +19,7 @@ export default function WelcomeModal() {
   const [isClosing, setIsClosing] = useState(false);
 
   // Show only if user has finished onboarding (businessName exists) but hasn't seen welcome
-  const show = !!user && !!user.businessName && !user.hasSeenWelcome;
+  const show = !!user && !!user.businessName && user.hasSeenWelcome === false;
 
   const handleClose = async () => {
     setIsClosing(true);
