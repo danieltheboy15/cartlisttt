@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -80,6 +81,7 @@ export default function CustomerDetails() {
   const { phone } = useParams<{ phone: string }>();
   const navigate = useNavigate();
   const { user, logout, fetchWithAuth } = useAuth();
+  const { showToast } = useToast();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   
   const [loading, setLoading] = useState(true);
@@ -186,6 +188,7 @@ export default function CustomerDetails() {
     if (stockpileId) {
       const publicLink = `${window.location.origin}/view/${stockpileId}`;
       navigator.clipboard.writeText(publicLink);
+      showToast("Copied to clipboard");
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     }
