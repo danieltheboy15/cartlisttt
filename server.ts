@@ -374,6 +374,63 @@ Thank you for choosing ${vendor.businessName}!`;
   }
 };
 
+const sendStockpileClosedNotification = async (vendor: any, stockpile: any) => {
+  try {
+    const prefs = vendor.notifications?.stockpileUpdates || { email: true, sms: true, push: true, inApp: true };
+    const appUrl = process.env.APP_URL || "";
+    const publicUrl = `${appUrl}/view/${stockpile._id}`;
+
+    // Send WhatsApp if enabled
+    if (prefs.sms !== false) {
+      const whatsappMessage = `Hi ${stockpile.customerName}! ✅
+Good news from ${vendor.businessName}! Your stockpile has been marked as completed/closed.
+
+Total Amount: ₦${stockpile.totalAmount.toLocaleString()}
+
+You can view your final stockpile list and delivery details here 👉 ${publicUrl}
+
+Thank you for choosing ${vendor.businessName}!`;
+
+      await sendWhatsAppNotification(stockpile.customerPhone, whatsappMessage);
+    }
+
+    // Send Email if enabled
+    if (prefs.email !== false && stockpile.customerEmail) {
+      const resend = getResend();
+      if (resend) {
+        await resend.emails.send({
+          from: "Cartlist <onboarding@buynightflix.com>",
+          to: stockpile.customerEmail,
+          subject: `Stockpile Closed - ${vendor.businessName}`,
+          html: `
+            <div style="font-family: sans-serif; padding: 20px; color: #333;">
+              <h2>Hi ${stockpile.customerName}!</h2>
+              <p>Great news! Your stockpile at <strong>${vendor.businessName}</strong> has been marked as <strong>completed/closed</strong>.</p>
+              <p><strong>Total Amount:</strong> ₦${stockpile.totalAmount.toLocaleString()}</p>
+              <p><a href="${publicUrl}" style="display: inline-block; padding: 10px 20px; background-color: #F07E48; color: white; text-decoration: none; border-radius: 5px;">View Final Details</a></p>
+              <p>Thank you for shopping with us!</p>
+            </div>
+          `
+        });
+      }
+    }
+
+    // Create in-app notification for vendor
+    await Notification.create({
+      userId: vendor._id,
+      title: "Stockpile Closed",
+      message: `You've closed ${stockpile.customerName}'s stockpile.`,
+      type: "success",
+      stockpileId: stockpile._id
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error sending closing notification:", error);
+    return false;
+  }
+};
+
 // Trust proxy is required for secure cookies behind a proxy (Cloud Run/AI Studio)
 app.set("trust proxy", 1);
 
@@ -505,7 +562,7 @@ const notificationSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   title: { type: String, required: true },
   message: { type: String, required: true },
-  type: { type: String, enum: ["info", "warning", "urgent"], default: "info" },
+  type: { type: String, enum: ["info", "warning", "urgent", "success"], default: "info" },
   isRead: { type: Boolean, default: false },
   stockpileId: { type: mongoose.Schema.Types.ObjectId, ref: "Stockpile" },
   createdAt: { type: Date, default: Date.now }
@@ -1302,6 +1359,11 @@ app.patch("/api/stockpiles/:id", authenticate, async (req: any, res) => {
       if (endDate && new Date(endDate).getTime() !== new Date(originalStockpile.endDate).getTime()) {
         await sendStockpileExtensionNotification(vendor, stockpile);
       }
+
+      // Send closed notification if status changed to closed
+      if (status === "closed" && originalStockpile.status !== "closed") {
+        await sendStockpileClosedNotification(vendor, stockpile);
+      }
     }
 
     res.json(stockpile);
@@ -1324,6 +1386,14 @@ app.patch("/api/stockpiles/:id/status", authenticate, async (req: any, res) => {
 
     if (!stockpile) return res.status(404).json({ message: "Stockpile not found" });
 
+    // Send closed notification if status changed to closed
+    if (status === "closed") {
+      const vendor = await User.findById(vendorId);
+      if (vendor) {
+        await sendStockpileClosedNotification(vendor, stockpile);
+      }
+    }
+
     res.json(stockpile);
   } catch (error) {
     res.status(500).json({ message: "Error updating stockpile status" });
@@ -1338,8 +1408,16 @@ app.patch("/api/stockpiles/:id/toggle-delivery", authenticate, async (req: any, 
     if (!stockpile) return res.status(404).json({ message: "Stockpile not found" });
 
     stockpile.status = stockpile.status === "active" ? "closed" : "active";
+    const statusChangedToClosed = stockpile.status === "closed";
     stockpile.updatedAt = new Date();
     await stockpile.save();
+
+    if (statusChangedToClosed) {
+      const vendor = await User.findById(vendorId);
+      if (vendor) {
+        await sendStockpileClosedNotification(vendor, stockpile);
+      }
+    }
 
     res.json(stockpile);
   } catch (error) {
@@ -1361,6 +1439,16 @@ app.patch("/api/stockpiles/bulk-status", authenticate, async (req: any, res) => 
       { _id: { $in: ids }, vendorId, isDeleted: { $ne: true } },
       { status, updatedAt: new Date() }
     );
+
+    if (status === "closed") {
+      const vendor = await User.findById(vendorId);
+      if (vendor) {
+        const stockpiles = await Stockpile.find({ _id: { $in: ids }, vendorId, status: "closed" });
+        for (const s of stockpiles) {
+          await sendStockpileClosedNotification(vendor, s);
+        }
+      }
+    }
 
     res.json({ message: `Successfully marked ${ids.length} stockpiles as ${status}` });
   } catch (error) {
