@@ -41,7 +41,12 @@ interface PublicStockpileData {
     ownerName: string;
     whatsappNumber: string;
     profilePicture: string;
+    currency?: string;
+    enableLateFees?: boolean;
+    lateFeeAmount?: number;
   };
+  lateFee?: number;
+  isOverdue?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -179,11 +184,60 @@ export default function PublicCustomerView() {
                 </div>
                 <div className="space-y-1 md:text-right">
                   <p className="text-sm font-bold text-gray-400">Time remaining</p>
-                  <p className="text-4xl font-black text-gray-900">
-                    {daysLeft > 0 ? `${daysLeft} days` : daysLeft === 0 ? "Closes today" : "Closed"}
+                  <p className={`text-4xl font-black ${daysLeft < 0 ? 'text-red-500' : 'text-gray-900'}`}>
+                    {daysLeft > 0 ? `${daysLeft} days` : daysLeft === 0 ? "Closes today" : "Deadline missed"}
                   </p>
                 </div>
               </div>
+
+              {/* Late Fee Policy Information */}
+              {data.vendorId.enableLateFees && data.vendorId.lateFeeAmount && data.vendorId.lateFeeAmount > 0 && !data.isOverdue && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-orange-50/50 border border-orange-100 rounded-[24px] p-6 space-y-2"
+                >
+                  <div className="flex items-center gap-2 text-cartlist-orange font-bold text-sm">
+                    <Clock className="w-4 h-4" />
+                    Late Fee Policy
+                  </div>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    Please note that a daily late fee of 
+                    <span className="font-bold text-gray-900 mx-1">
+                      {data.vendorId.currency === "Dollar" ? "$" : data.vendorId.currency === "Euro" ? "€" : "₦"}
+                      {data.vendorId.lateFeeAmount.toLocaleString()}
+                    </span>
+                    will be applied automatically for every day this stockpile is kept past the deadline of 
+                    <span className="font-bold text-gray-900 ml-1">
+                      {format(new Date(data.endDate), "do MMM, yyyy")}
+                    </span>.
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Late Fees Section (Already Overdue) */}
+              {data.isOverdue && data.lateFee && data.lateFee > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border border-red-100 rounded-[24px] p-6 space-y-3"
+                >
+                  <div className="flex items-center gap-3 text-red-600">
+                    <Clock className="w-5 h-5" />
+                    <h3 className="font-bold">Overdue Stockpile</h3>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600 font-medium">Accumulated Late Fee</p>
+                    <p className="text-xl font-black text-red-600">
+                      {data.vendorId.currency === "Dollar" ? "$" : data.vendorId.currency === "Euro" ? "€" : "₦"}
+                      {data.lateFee.toLocaleString()}
+                    </p>
+                  </div>
+                  <p className="text-[10px] text-red-400 font-medium italic">
+                    * This fee is calculated daily for stockpiles kept past their deadline.
+                  </p>
+                </motion.div>
+              )}
 
               {/* Delivery Section */}
               <div className="space-y-3">
@@ -230,8 +284,23 @@ export default function PublicCustomerView() {
                 
                 <div className="border-t border-dashed border-gray-200 pt-6 flex justify-between items-center">
                   <span className="text-gray-600 font-medium">Total value</span>
-                  <span className="text-2xl font-black text-gray-900">N{data.totalAmount.toLocaleString()}</span>
+                  <span className="text-2xl font-black text-gray-900">
+                    {data.vendorId.currency === "Dollar" ? "$" : data.vendorId.currency === "Euro" ? "€" : "₦"}
+                    {data.totalAmount.toLocaleString()}
+                  </span>
                 </div>
+
+                {data.isOverdue && data.lateFee && data.lateFee > 0 && (
+                  <div className="pt-4 flex justify-between items-center text-red-600">
+                    <span className="font-bold flex items-center gap-1">
+                      Grand Total <Clock className="w-3 h-3" />
+                    </span>
+                    <span className="text-3xl font-black">
+                      {data.vendorId.currency === "Dollar" ? "$" : data.vendorId.currency === "Euro" ? "€" : "₦"}
+                      {(data.totalAmount + data.lateFee).toLocaleString()}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Question Section */}
