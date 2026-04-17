@@ -82,10 +82,12 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
                         <div className="flex gap-4">
                           <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center ${
                             n.type === 'urgent' ? 'bg-red-50 text-red-500' : 
+                            n.type === 'success' ? 'bg-green-50 text-green-500' :
                             n.type === 'warning' ? 'bg-orange-50 text-orange-500' : 'bg-blue-50 text-blue-500'
                           }`}>
                             {n.type === 'urgent' ? <AlertCircle className="w-5 h-5" /> : 
-                             n.type === 'warning' ? <Info className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+                             n.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> :
+                             n.type === 'warning' ? <Info className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
                           </div>
                           <div className="space-y-1 flex-1">
                             <p className={`text-sm ${!n.isRead ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{n.title}</p>
