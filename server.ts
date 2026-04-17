@@ -529,6 +529,8 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: { type: Date },
   resetPasswordAttempts: [{ type: Date }],
   hasSeenWelcome: { type: Boolean, default: true },
+  lateFeeAmount: { type: Number, default: 0 },
+  enableLateFees: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -589,8 +591,20 @@ app.get("/api/public/stockpiles/:id", async (req, res) => {
     const stockpile = await Stockpile.findById(req.params.id);
     if (!stockpile) return res.status(404).json({ message: "Stockpile not found" });
 
-    const vendor = await User.findById(stockpile.vendorId).select("businessName ownerName whatsappNumber profilePicture notifications");
+    const vendor = await User.findById(stockpile.vendorId).select("businessName ownerName whatsappNumber profilePicture notifications enableLateFees lateFeeAmount currency");
     if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+
+    // Calculate late fee if enabled and deadline passed
+    let lateFee = 0;
+    if (vendor.enableLateFees && vendor.lateFeeAmount > 0 && stockpile.status === "active") {
+      const deadline = new Date(stockpile.endDate);
+      const now = new Date();
+      if (now > deadline) {
+        const diffTime = Math.abs(now.getTime() - deadline.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        lateFee = diffDays * vendor.lateFeeAmount;
+      }
+    }
 
     // Notify vendor of activity if enabled
     const prefs = vendor.notifications?.customerActivity || { email: true, sms: false, push: true, inApp: true };
@@ -607,7 +621,12 @@ app.get("/api/public/stockpiles/:id", async (req, res) => {
 
     // You could also send email/push here if enabled in prefs
 
-    res.json({ ...stockpile.toObject(), vendorId: vendor });
+    res.json({ 
+      ...stockpile.toObject(), 
+      vendorId: vendor,
+      lateFee: lateFee,
+      isOverdue: lateFee > 0
+    });
   } catch (error) {
     console.error("Fetch public stockpile error:", error);
     res.status(500).json({ message: "Error fetching stockpile" });
@@ -811,12 +830,22 @@ app.get("/api/user/profile", authenticate, async (req: any, res) => {
 app.patch("/api/user/profile", authenticate, async (req: any, res) => {
   try {
     const updates = req.body;
+    console.log("Updating profile for user:", req.userId, "with updates:", JSON.stringify(updates));
     // Don't allow password updates here
     delete updates.password;
     
-    const user = await User.findByIdAndUpdate(req.userId, updates, { new: true }).select("-password");
+    // Explicitly check for late fee fields in the request body
+    const user = await User.findByIdAndUpdate(
+      req.userId, 
+      { $set: updates }, 
+      { new: true, runValidators: true }
+    ).select("-password");
+    
+    if (!user) return res.status(404).json({ message: "User not found" });
+    console.log("User updated successfully:", user._id);
     res.json(user);
   } catch (error) {
+    console.error("Error updating profile:", error);
     res.status(500).json({ message: "Error updating profile" });
   }
 });
