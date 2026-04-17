@@ -14,8 +14,12 @@ export default function BusinessNameModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Only show if user is logged in but has no business name, whatsapp number or category
-  const show = !!user && (!user.businessName || !user.whatsappNumber || !user.businessCategory);
+  // Only show if user is logged in via Google, is a new user (hasSeenWelcome is false), 
+  // and hasn't filled these details yet. Existing/Returning users should not see this.
+  const show = !!user && 
+    !!user.googleId && 
+    user.hasSeenWelcome === false && 
+    (!user.businessName || !user.whatsappNumber || !user.businessCategory);
 
   const categories = [
     "Food & Groceries",
