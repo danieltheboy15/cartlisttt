@@ -46,24 +46,16 @@ export default function Landing() {
     <div className="min-h-screen selection:bg-orange-100 selection:text-cartlist-orange">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-orange-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            <Logo />
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#about" className="text-sm font-medium hover:text-cartlist-orange transition-colors">About</a>
-              <a href="#contact" className="text-sm font-medium hover:text-cartlist-orange transition-colors">Contact</a>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to="/login">
-              <Button variant="ghost" className="text-sm font-medium">Login</Button>
-            </Link>
-            <Link to="/register">
-              <Button className="bg-cartlist-orange hover:bg-orange-600 text-white rounded-full px-6">Sign up</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+  <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-center">
+    
+    {/* Left links (optional) */}
+   
+
+    {/* Centered Logo */}
+    <Logo />
+
+  </div>
+</nav>
 
       {/* Hero Section */}
       <section className="relative pt-40 pb-20 overflow-hidden">
@@ -149,7 +141,7 @@ export default function Landing() {
       <footer className="relative pt-40 pb-20 overflow-hidden bg-background">
         {/* Large Watermark */}
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full text-center pointer-events-none select-none opacity-[0.03]">
-          <span className="text-[20vw] font-black tracking-tighter leading-none">CARTLIST</span>
+          <span className="text-[20vw] font-[#f07e48] tracking-tighter leading-none">CARTLIST</span>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -161,28 +153,21 @@ export default function Landing() {
               </p>
             </div>
             
-            <div>
-              <h4 className="font-bold mb-6 font-heading">Company</h4>
-              <ul className="space-y-4 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-cartlist-orange transition-colors">About us</a></li>
-                <li><a href="#" className="hover:text-cartlist-orange transition-colors">Waitlist</a></li>
-                <li><a href="#" className="hover:text-cartlist-orange transition-colors">Contact us</a></li>
-              </ul>
-            </div>
+            
 
             <div>
               <h4 className="font-bold mb-6 font-heading">Socials</h4>
               <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://www.instagram.com/usecartlist/" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Instagram className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://www.linkedin.com/company/cart-list/" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Linkedin className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://www.facebook.com/share/17YTivYRT2/?mibextid=wwXIfr" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Facebook className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://x.com/usecartlist" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Twitter className="w-5 h-5" />
                 </a>
               </div>
@@ -191,10 +176,7 @@ export default function Landing() {
 
           <div className="pt-8 border-t border-orange-100 flex flex-col md:row-reverse md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
             <p>© 2026 Cartlist stockpile solution</p>
-            <div className="flex gap-8">
-              <a href="#" className="hover:text-cartlist-orange transition-colors">Privacy policy</a>
-              <a href="#" className="hover:text-cartlist-orange transition-colors">Terms of service</a>
-            </div>
+            
           </div>
         </div>
       </footer>
