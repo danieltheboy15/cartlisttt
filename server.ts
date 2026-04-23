@@ -18,6 +18,7 @@ const app = express();
 const PORT = 3000;
 const MONGODB_URI = process.env.MONGODB_URI;
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
+const FROM_EMAIL = process.env.EMAIL_FROM || "onboarding@resend.dev";
 
 // Lazy initialize Resend to avoid crashing if API key is missing
 let resendClient: Resend | null = null;
@@ -42,7 +43,7 @@ const sendVerificationEmail = async (email: string, firstName: string, verificat
 
   try {
     await resend.emails.send({
-      from: "Cartlist <onboarding@buynightflix.com>",
+      from: `Cartlist <${FROM_EMAIL}>`,
       to: email,
       subject: "Verify your Cartlist account",
       html: `
@@ -86,7 +87,7 @@ const sendWelcomeEmail = async (email: string, firstName: string) => {
 
   try {
     await resend.emails.send({
-      from: "Cartlist <onboarding@buynightflix.com>",
+      from: `Cartlist <${FROM_EMAIL}>`,
       to: email,
       subject: "Welcome to Cartlist! 🚀",
       html: `
@@ -300,7 +301,7 @@ Questions? Contact ${vendor.businessName} on WhatsApp.`;
       const resend = getResend();
       if (resend) {
         await resend.emails.send({
-          from: "Cartlist <onboarding@buynightflix.com>",
+          from: `Cartlist <${FROM_EMAIL}>`,
           to: stockpile.customerEmail,
           subject: `Stockpile Update from ${vendor.businessName}`,
           html: `
@@ -351,7 +352,7 @@ Thank you for choosing ${vendor.businessName}!`;
       const resend = getResend();
       if (resend) {
         await resend.emails.send({
-          from: "Cartlist <onboarding@buynightflix.com>",
+          from: `Cartlist <${FROM_EMAIL}>`,
           to: stockpile.customerEmail,
           subject: `${vendor.businessName} has extended your stockpile deadline`,
           html: `
@@ -399,7 +400,7 @@ Thank you for choosing ${vendor.businessName}!`;
       const resend = getResend();
       if (resend) {
         await resend.emails.send({
-          from: "Cartlist <onboarding@buynightflix.com>",
+          from: `Cartlist <${FROM_EMAIL}>`,
           to: stockpile.customerEmail,
           subject: `Stockpile Closed - ${vendor.businessName}`,
           html: `
@@ -572,6 +573,14 @@ const notificationSchema = new mongoose.Schema({
 
 const Notification = mongoose.model("Notification", notificationSchema);
 
+// Waitlist Schema
+const waitlistSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Waitlist = mongoose.model("Waitlist", waitlistSchema);
+
 // Customer Schema
 const customerSchema = new mongoose.Schema({
   vendorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -633,6 +642,53 @@ app.get("/api/public/stockpiles/:id", async (req, res) => {
   }
 });
 
+app.post("/api/waitlist", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Store in database
+    const existing = await Waitlist.findOne({ email });
+    if (existing) {
+      return res.status(200).json({ message: "Already on the waitlist!" });
+    }
+
+    const waitlistEntry = new Waitlist({ email });
+    await waitlistEntry.save();
+
+    // Send email notification to usecartlist@gmail.com
+    const resend = getResend();
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: `Cartlist Waitlist <${FROM_EMAIL}>`,
+          to: "usecartlist@gmail.com",
+          subject: "New Waitlist Signup! 🚀",
+          html: `
+            <div style="font-family: sans-serif; padding: 20px;">
+              <h2>New Waitlist Submission</h2>
+              <p>A new user has just joined the Cartlist waitlist!</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+          `
+        });
+      } catch (err) {
+        console.error("Failed to send waitlist email notification:", err);
+      }
+    } else {
+      console.log("New waitlist signup (Resend not configured):", email);
+    }
+
+    res.status(201).json({ message: "Successfully joined waitlist" });
+  } catch (error) {
+    console.error("Waitlist error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 app.post("/api/stockpiles/:id/remind", authenticate, async (req: any, res) => {
   try {
     const vendorId = req.userId;
@@ -666,7 +722,7 @@ Don't forget to finalize your orders!`;
       const resend = getResend();
       if (resend) {
         await resend.emails.send({
-          from: "Cartlist <onboarding@buynightflix.com>",
+          from: `Cartlist <${FROM_EMAIL}>`,
           to: stockpile.customerEmail,
           subject: `Reminder: Your Stockpile with ${vendor.businessName}`,
           html: `
@@ -1890,7 +1946,7 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     const resend = getResend();
     if (resend) {
       await resend.emails.send({
-        from: "Cartlist <onboarding@buynightflix.com>",
+        from: `Cartlist <${FROM_EMAIL}>`,
         to: email,
         subject: "Password Reset OTP",
         html: `
