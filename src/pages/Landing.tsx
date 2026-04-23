@@ -10,7 +10,9 @@ import {
   Twitter,
   CheckCircle2,
   X,
-  Sparkles
+  Sparkles,
+  PartyPopper,
+  TreePine
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,8 +58,8 @@ const SuccessPopup = ({ onClose }: { onClose: () => void }) => (
       </button>
 
       <div className="relative z-10 text-center">
-        <div className="w-20 h-20 bg-cartlist-orange/10 rounded-3xl flex items-center justify-center mx-auto mb-8 rotate-3">
-          <Sparkles className="w-10 h-10 text-cartlist-orange" />
+        <div className="w-20 h-20 bg-cartlist-orange/10 rounded-3xl flex items-center justify-center mx-auto mb-8 rotate-6">
+          <PartyPopper className="w-10 h-10 text-cartlist-orange" />
         </div>
 
         <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 tracking-tight">You're on the list! 🎉</h2>
@@ -65,19 +67,17 @@ const SuccessPopup = ({ onClose }: { onClose: () => void }) => (
           Thanks for joining our early access waitlist. We'll hit you up as soon as we're ready to flip the switch!
         </p>
 
-        <div className="space-y-6">
-          <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Follow our journey</p>
-          <div className="flex justify-center gap-4">
-            <a href="#" className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center hover:bg-orange-50 hover:text-cartlist-orange transition-all hover:scale-110 active:scale-95 group">
-              <Instagram className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-            </a>
-            <a href="#" className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center hover:bg-orange-50 hover:text-cartlist-orange transition-all hover:scale-110 active:scale-95 group">
-              <Twitter className="w-6 h-6 group-hover:-rotate-12 transition-transform" />
-            </a>
-            <a href="#" className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center hover:bg-orange-50 hover:text-cartlist-orange transition-all hover:scale-110 active:scale-95 group">
-              <Linkedin className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-            </a>
-          </div>
+        <div className="space-y-4">
+          <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Connect with us</p>
+          <a 
+            href="https://linktr.ee/usecartlist" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-3 w-full h-14 rounded-2xl bg-[#25D366]/5 border-2 border-[#25D366]/20 text-[#25D366] hover:bg-[#25D366]/10 transition-all font-bold group"
+          >
+            <TreePine className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <span>Follow Our Socials</span>
+          </a>
         </div>
 
         <Button 
