@@ -260,16 +260,16 @@ export default function Landing() {
             <div>
               <h4 className="font-bold mb-6 font-heading">Socials</h4>
               <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://www.instagram.com/usecartlist" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Instagram className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://www.linkedin.com/company/112261294" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Linkedin className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://www.facebook.com/usecartlist" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Facebook className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
+                <a href="https://x.com/usecartlist?s=21" className="w-10 h-10 rounded-lg border border-orange-100 flex items-center justify-center hover:bg-orange-50 transition-colors">
                   <Twitter className="w-5 h-5" />
                 </a>
               </div>
@@ -277,7 +277,7 @@ export default function Landing() {
           </div>
 
           <div className="pt-8 border-t border-orange-100 flex flex-col md:row-reverse md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>© 2026 Cartlist stockpile solution</p>
+            <p>© 2026 Cartlist Hub</p>
             <div className="flex gap-8">
               <a href="#" className="hover:text-cartlist-orange transition-colors">Privacy policy</a>
               <a href="#" className="hover:text-cartlist-orange transition-colors">Terms of service</a>
