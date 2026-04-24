@@ -1,28 +1,56 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cartlist - Every Order, In Check</title>
-    <meta name="google-site-verification" content="TYnSL7xYio-tb20kwBjlYqjmC3sf_d0n26qehCUdxIU" />
-    <script>
-      // Fix for "Cannot set property fetch of #<Window> which has only a getter"
-      // This protects the native fetch from being overwritten by polyfills.
-      (function() {
-        const originalFetch = window.fetch;
-        if (originalFetch) {
-          try {
-            Object.defineProperty(window, 'fetch', {
-              get: function() { return originalFetch; },
-              set: function(v) { console.warn('Blocked attempt to overwrite window.fetch'); },
-              configurable: true
-            });
-          } catch (e) {}
-        }
-      })();
-    </script>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DannyYo696/svillage/cfdfd8520f96d8d336b2d00597bb7e5bde1cde14/cl%20logo.png" />
-  </head>
+ <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary SEO -->
+  <title>Cartlist — Track Orders, Manage Purchases & Stay Organized</title>
+  <meta name="description" content="Cartlist helps you track every order, manage purchases, stay organized and send automated reminders. Perfect for online shoppers, small business owners, and anyone who wants control over their spending." />
+  <meta name="keywords" content="Cartlist, Usecartlist, order tracking app Nigeria, track online orders, shopping tracker, manage purchases, Cartlist app, e-commerce tools Nigeria" />
+  <meta name="author" content="Cartlist" />
+
+  <!-- Google Verification -->
+  <meta name="google-site-verification" content="TYnSL7xYio-tb20kwBjlYqjmC3sf_d0n26qehCUdxIU" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://www.usecartlist.com/" />
+
+  <!-- Open Graph (for WhatsApp, Facebook, LinkedIn) -->
+  <meta property="og:title" content="Cartlist — Every Order, In Check" />
+  <meta property="og:description" content="Stop losing track of your orders. Cartlist helps you manage everything you buy in one place." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/DannyYo696/svillage/cfdfd8520f96d8d336b2d00597bb7e5bde1cde14/cl%20logo.png" />
+  <meta property="og:url" content="https://www.usecartlist.com/" />
+  <meta property="og:type" content="website" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Cartlist — Every Order, In Check" />
+  <meta name="twitter:description" content="Track your orders. Stay organized. Spend smarter. Automate Reminders" />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/DannyYo696/svillage/cfdfd8520f96d8d336b2d00597bb7e5bde1cde14/cl%20logo.png" />
+
+  <!-- Robots -->
+  <meta name="robots" content="index, follow" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DannyYo696/svillage/cfdfd8520f96d8d336b2d00597bb7e5bde1cde14/cl%20logo.png" />
+
+  <!-- Fetch fix script (keep yours) -->
+  <script>
+    (function() {
+      const originalFetch = window.fetch;
+      if (originalFetch) {
+        try {
+          Object.defineProperty(window, 'fetch', {
+            get: function() { return originalFetch; },
+            set: function(v) { console.warn('Blocked attempt to overwrite window.fetch'); },
+            configurable: true
+          });
+        } catch (e) {}
+      }
+    })();
+  </script>
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
